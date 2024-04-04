@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatGPT Chatbot</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            display: flex;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .threads {
+            width: 200px;
+            background-color: white;
+            border: 1px solid #e5e5e5;
+            padding: 20px;
+            margin-right: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .threads h3 {
+            margin-top: 0;
+        }
+        .threads ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .threads li {
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .chat-container {
+            flex-grow: 1;
+        }
+        .chat-header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        #chatbox {
+            background-color: white;
+            border: 1px solid #e5e5e5;
+            padding: 20px;
+            margin-bottom: 20px;
+            height: 400px;
+            overflow-y: auto;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #chatbox p {
+            margin: 0 0 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        #chatbox p:nth-child(odd) {
+            background-color: #f1f0f0;
+        }
+        #chatbox p:nth-child(even) {
+            background-color: #e1f2ff;
+        }
+        #chatForm {
+            display: flex;
+            justify-content: center;
+        }
+        #userInput {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #e5e5e5;
+            border-radius: 20px;
+            outline: none;
+        }
+        #chatForm button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #chatForm button:hover {
+            background-color: #0056b3;
+        }
+        #newThreadBtn {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #newThreadBtn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="threads">
+            <h3>Threads</h3>
+            <ul id="threadList">
+                <!-- Los threads se generarán dinámicamente aquí -->
+            </ul>
+            <button id="newThreadBtn">New Thread</button>
+        </div>
+        <div class="chat-container">
+            <div class="chat-header">Chatbot</div>
+            <div id="chatbox">
+                <!-- Los mensajes del chat se agregarán aquí -->
+            </div>
+            <form id="chatForm">
+                <input type="text" id="userInput" placeholder="Type your message here...">
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var activeThread = null;
+
+            // Función para obtener la lista de threads existentes
+            function getThreads() {
+                $.get('/threads', function(data) {
+                    $('#threadList').empty();
+                    data.threads.forEach(function(threadId) {
+                        $('#threadList').append('<li data-thread-id="' + threadId + '">' + threadId + '</li>');
+                    });
+                });
+            }
+
+            // Evento de clic para crear un nuevo thread
+            $('#newThreadBtn').click(function() {
+                $.post('/new_thread', function(data) {
+                    var threadId = data.thread_id;
+                    $('#threadList').append('<li data-thread-id="' + threadId + '">' + threadId + '</li>');
+                    activeThread = threadId;
+                    $('#chatbox').empty();
+                });
+            });
+
+            // Evento de clic para cargar un thread existente
+            $('#threadList').on('click', 'li', function() {
+                var threadId = $(this).data('thread-id');
+                activeThread = threadId;
+                $('#chatbox').empty(); // Limpiar el chatbox antes de cargar nuevos mensajes
+
+                // Solicitar los mensajes del thread seleccionado
+                $.post('/load_thread', { thread_id: threadId }, function(data) {
+                    // Mostrar los mensajes del thread en el chatbox
+                    data.messages.forEach(function(message) {
+                        $('#chatbox').append('<p>' + message + '</p>');
+                    });
+                    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+                }).fail(function() {
+                    alert('Error al cargar el thread');
+                });
+            });
+
+            // Evento de envío de formulario para enviar un mensaje
+            $('#chatForm').submit(function(e) {
+                e.preventDefault();
+                var userInput = $('#userInput').val();
+                $('#userInput').val('');
+                $.post('/chat', { user_input: userInput, thread_id: activeThread }, function(data) {
+                    $('#chatbox').append('<p>You: ' + userInput + '</p>');
+                    $('#chatbox').append('<p>ChatGPT: ' + data.response + '</p>');
+                    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+                });
+            });
+
+            // Obtener la lista de threads al cargar la página
+            getThreads();
+        });
+    </script>
+</body>
+</html>
