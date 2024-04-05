@@ -18,7 +18,6 @@ class Chatbot:
             # This is the default and can be omitted
             api_key=os.environ.get("OPENAI_API_KEY"),
         )
-        # Asegúrate de utilizar el endpoint correcto para modelos de chat
         response = openai.chat.completions.create(
             model="gpt-3.5-turbo-0613",
             messages=[
@@ -101,7 +100,7 @@ class Chatbot:
             self.threads = {}
 
     def run(self):
-        print("Welcome to the ChatGPT Chatbot! Type 'quit' to exit.")
+        print("Welcome to the Chatbot! Type 'quit' to exit.")
         self.create_thread()
 
         while True:
@@ -120,7 +119,6 @@ class Chatbot:
                 self.save_conversation(self.active_thread)
                 response = Chatbot.chat_with_gpt(conversation_history)
                 conversation_history.append("Chatbot: " + response)
-                print("ChatGPT: " + response)
 
 
 if __name__ == "__main__":

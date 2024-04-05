@@ -182,7 +182,7 @@
                 $('#userInput').val('');
                 $.post('/chat', { user_input: userInput, thread_id: activeThread }, function(data) {
                     $('#chatbox').append('<p>You: ' + userInput + '</p>');
-                    $('#chatbox').append('<p>ChatGPT: ' + data.response + '</p>');
+                    $('#chatbox').append('<p>' + data.response + '</p>');
                     $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
                 });
             });
