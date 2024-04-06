@@ -1,6 +1,6 @@
 # Chatbot
 
-This is a POC of a integration between an external interface with a backend-side application and a ChatGPT model.
+This is a POC of a integration between an external interface with a backend-side application and a ChatGPT model. Be aware that bugs are possible there, this is a basic implementation and it is still in progress.
 
 ## Installation
 
