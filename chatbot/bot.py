@@ -1,8 +1,7 @@
 import json
 
-from openai import OpenAI
 import os
-import random
+from openai import OpenAI
 
 
 class Chatbot:
