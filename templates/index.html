@@ -12,12 +12,14 @@
             padding: 0;
             font-family: 'Arial', sans-serif;
         }
+
         .container {
             display: flex;
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
         }
+
         .threads {
             width: 200px;
             background-color: white;
@@ -26,21 +28,39 @@
             margin-right: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto; /* Make the threads container scrollable */
+            max-height: 600px; /* Adjust based on your layout */
         }
+
         .threads h3 {
             margin-top: 0;
         }
+
         .threads ul {
-            list-style-type: none;
             padding: 0;
+            list-style-type: none;
         }
+
         .threads li {
+            padding: 10px;
             margin-bottom: 10px;
             cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
         }
+
+        .threads li:hover {
+            background-color: #f1f0f0; /* Light background on hover */
+        }
+
+        .threads li.active {
+            background-color: #e1f2ff; /* Distinct background for the active thread */
+        }
+
         .chat-container {
             flex-grow: 1;
         }
+
         .chat-header {
             background-color: #007bff;
             color: white;
@@ -51,6 +71,7 @@
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
         }
+
         #chatbox {
             background-color: white;
             border: 1px solid #e5e5e5;
@@ -61,22 +82,52 @@
             border-bottom-left-radius: 10px;
             border-bottom-right-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
         }
-        #chatbox p {
-            margin: 0 0 10px 0;
+
+        .user-message, .bot-response {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
             padding: 10px;
             border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 70%;
         }
-        #chatbox p:nth-child(odd) {
-            background-color: #f1f0f0;
+
+        .user-message {
+            background-color: #0084ff; /* Facebook Messenger's blue */
+            color: #fff; /* White text */
+            padding: 10px;
+            border-radius: 20px; /* Rounded corners */
+            margin-bottom: 10px;
+            max-width: 70%;
+            align-self: flex-end; /* Align to the right */
+            margin-left: auto; /* Push to the right */
         }
-        #chatbox p:nth-child(even) {
-            background-color: #e1f2ff;
+
+        .bot-response {
+            background-color: #f0f0f0; /* Light grey background */
+            color: #333; /* Dark grey text */
+            padding: 10px;
+            border-radius: 20px; /* Rounded corners */
+            margin-bottom: 10px;
+            max-width: 70%;
+            align-self: flex-start; /* Align to the left */
         }
-        #chatForm {
+
+        .user-message span, .bot-response span {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        #chatbox {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: flex-start; /* Align messages to the start */
         }
+
         #userInput {
             flex-grow: 1;
             padding: 10px;
@@ -84,6 +135,7 @@
             border-radius: 20px;
             outline: none;
         }
+
         #chatForm button {
             margin-left: 10px;
             padding: 10px 20px;
@@ -94,9 +146,11 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         #chatForm button:hover {
             background-color: #0056b3;
         }
+
         #newThreadBtn {
             margin-top: 10px;
             padding: 5px 10px;
@@ -107,89 +161,109 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         #newThreadBtn:hover {
             background-color: #0056b3;
+        }
+
+        .bot-response pre {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="threads">
-            <h3>Threads</h3>
-            <ul id="threadList">
-                <!-- Los threads se generarán dinámicamente aquí -->
-            </ul>
-            <button id="newThreadBtn">New Thread</button>
-        </div>
-        <div class="chat-container">
-            <div class="chat-header">Chatbot</div>
-            <div id="chatbox">
-                <!-- Los mensajes del chat se agregarán aquí -->
-            </div>
-            <form id="chatForm">
-                <input type="text" id="userInput" placeholder="Type your message here...">
-                <button type="submit">Send</button>
-            </form>
-        </div>
+<div class="container">
+    <div class="threads">
+        <h3>Threads</h3>
+        <ul id="threadList">
+            <!-- Los threads se generarán dinámicamente aquí -->
+        </ul>
+        <button id="newThreadBtn">New Thread</button>
     </div>
+    <div class="chat-container">
+        <div class="chat-header">Chatbot</div>
+        <div id="chatbox">
+            <!-- Los mensajes del chat se agregarán aquí -->
+        </div>
+        <form id="chatForm">
+            <input type="text" id="userInput" placeholder="Type your message here...">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</div>
 
-    <script>
-        $(document).ready(function() {
-            var activeThread = null;
+<script>
+    $(document).ready(function () {
+        var activeThread = null;
 
-            // Función para obtener la lista de threads existentes
-            function getThreads() {
-                $.get('/threads', function(data) {
-                    $('#threadList').empty();
-                    data.threads.forEach(function(threadId) {
-                        $('#threadList').append('<li data-thread-id="' + threadId + '">' + threadId + '</li>');
-                    });
-                });
-            }
-
-            // Evento de clic para crear un nuevo thread
-            $('#newThreadBtn').click(function() {
-                $.post('/new_thread', function(data) {
-                    var threadId = data.thread_id;
+        // Función para obtener la lista de threads existentes
+        function getThreads() {
+            $.get('/threads', function (data) {
+                $('#threadList').empty();
+                data.threads.forEach(function (threadId) {
                     $('#threadList').append('<li data-thread-id="' + threadId + '">' + threadId + '</li>');
-                    activeThread = threadId;
-                    $('#chatbox').empty();
                 });
             });
+        }
 
-            // Evento de clic para cargar un thread existente
-            $('#threadList').on('click', 'li', function() {
-                var threadId = $(this).data('thread-id');
-                activeThread = threadId;
-                $('#chatbox').empty(); // Limpiar el chatbox antes de cargar nuevos mensajes
+        // Evento de clic para crear un nuevo thread
+        $('#threadList').on('click', 'li', function () {
+            var threadId = $(this).data('thread-id');
+            activeThread = threadId;
+            $('#chatbox').empty(); // Limpiar el chatbox antes de cargar nuevos mensajes
 
-                // Solicitar los mensajes del thread seleccionado
-                $.post('/load_thread', { thread_id: threadId }, function(data) {
-                    // Mostrar los mensajes del thread en el chatbox
-                    data.messages.forEach(function(message) {
-                        $('#chatbox').append('<p>' + message + '</p>');
-                    });
-                    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
-                }).fail(function() {
-                    alert('Error al cargar el thread');
+            // Remove active class from all threads
+            $('#threadList li').removeClass('active');
+            // Add active class to the clicked thread
+            $(this).addClass('active');
+
+            // Solicitar los mensajes del thread seleccionado
+            $.post('/load_thread', {thread_id: threadId}, function (data) {
+                // Mostrar los mensajes del thread en el chatbox
+                data.messages.forEach(function (message) {
+                    $('#chatbox').append('<div class="user-message"><span>You</span> ' + message + '</div>');
                 });
+                $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+            }).fail(function () {
+                alert('Error al cargar el thread');
             });
-
-            // Evento de envío de formulario para enviar un mensaje
-            $('#chatForm').submit(function(e) {
-                e.preventDefault();
-                var userInput = $('#userInput').val();
-                $('#userInput').val('');
-                $.post('/chat', { user_input: userInput, thread_id: activeThread }, function(data) {
-                    $('#chatbox').append('<p>You: ' + userInput + '</p>');
-                    $('#chatbox').append('<p>' + data.response + '</p>');
-                    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
-                });
-            });
-
-            // Obtener la lista de threads al cargar la página
-            getThreads();
         });
-    </script>
+
+        // Evento de clic para cargar un thread existente
+        $('#threadList').on('click', 'li', function () {
+            var threadId = $(this).data('thread-id');
+            activeThread = threadId;
+            $('#chatbox').empty(); // Limpiar el chatbox antes de cargar nuevos mensajes
+
+            // Solicitar los mensajes del thread seleccionado
+            $.post('/load_thread', {thread_id: threadId}, function (data) {
+                // Mostrar los mensajes del thread en el chatbox
+                data.messages.forEach(function (message) {
+                    $('#chatbox').append('<div class="user-message">' + message + '</div>');
+                });
+                $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+            }).fail(function () {
+                alert('Error al cargar el thread');
+            });
+        });
+
+        // Evento de envío de formulario para enviar un mensaje
+        $('#chatForm').submit(function (e) {
+            e.preventDefault();
+            var userInput = $('#userInput').val();
+            $('#userInput').val('');
+            $.post('/chat', {user_input: userInput, thread_id: activeThread}, function (data) {
+                $('#chatbox').append('<div class="user-message">' + userInput + '</div>');
+                $('#chatbox').append('<div class="bot-response">' + data.response + '</div>');
+                $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+            });
+        });
+
+        // Obtener la lista de threads al cargar la página
+        getThreads();
+    });
+</script>
 </body>
 </html>

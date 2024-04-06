@@ -115,10 +115,10 @@ class Chatbot:
                 self.switch_thread(thread_id)
             else:
                 conversation_history = self.threads[self.active_thread]
-                conversation_history.append("You: " + user_input)
+                conversation_history.append(user_input)
                 self.save_conversation(self.active_thread)
                 response = Chatbot.chat_with_gpt(conversation_history)
-                conversation_history.append("Chatbot: " + response)
+                conversation_history.append(response)
 
 
 if __name__ == "__main__":
