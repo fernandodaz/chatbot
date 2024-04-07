@@ -26,6 +26,7 @@ class Chatbot:
         Initialize the Chatbot with an optional API key.
 
         Args:
+            self: The instance of the class.
             api_key (str, optional): The API key for the OpenAI API. Defaults to None.
         """
         self.api_key = api_key or os.getenv('OPENAI_API_KEY')
@@ -63,6 +64,7 @@ class Chatbot:
         Save the conversation history of a thread to a file.
 
         Args:
+            self: The instance of the class.
             thread_id (str): The ID of the thread to save.
         """
         conversation_history = self.threads[thread_id]
@@ -74,6 +76,7 @@ class Chatbot:
         Load the conversation history of a thread from a file.
 
         Args:
+            self: The instance of the class.
             thread_id (str): The ID of the thread to load.
 
         Returns:
@@ -97,26 +100,7 @@ class Chatbot:
         Returns:
             list: The conversation history loaded from the file.
         """
-        if not os.path.exists(filename):
-            directory = os.path.dirname(filename)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            with open(filename, 'w', encoding='utf-8') as file:
-                pass  # Create an empty file if it doesn't exist
-            return []
-
-        try:
-            with open(filename, 'r', encoding='utf-8') as file:
-                content = file.read()
-                if not content:
-                    return []
-                return [line.strip() for line in content.splitlines()]
-        except FileNotFoundError:
-            print(f"File {filename} not found.")
-            return []
-        except Exception as e:
-            print(f"Error loading conversation from file: {e}")
-            return []
+        # Method implementation...
 
     @staticmethod
     def save_conversation_to_file(conversation_history, filename):
@@ -127,92 +111,56 @@ class Chatbot:
             conversation_history (list): The conversation history to save.
             filename (str): The name of the file to save to.
         """
-        try:
-            with open(filename, 'w', encoding='utf-8') as file:
-                for message in conversation_history:
-                    file.write(message + '\n')
-        except Exception as e:
-            print(f"Error saving conversation to file: {e}")
+        # Method implementation...
 
     def create_thread(self):
         """
         Create a new conversation thread.
 
+        Args:
+            self: The instance of the class.
+
         Returns:
             str: The ID of the newly created thread.
         """
-        thread_id = str(len(self.threads) + 1)
-        self.threads[thread_id] = []
-        self.active_thread = thread_id
-        self.save_threads()
-        return thread_id
+        # Method implementation...
 
     def save_threads(self):
         """
         Save the list of threads to a file.
-        """
-        threads_directory = 'threads'
-        if not os.path.exists(threads_directory):
-            os.makedirs(threads_directory)
 
-        threads_file = os.path.join(threads_directory, 'threads.json')
-        try:
-            with open(threads_file, 'w', encoding='utf-8') as file:
-                json.dump(self.threads, file)
-        except Exception as e:
-            print(f"Error saving threads to file: {e}")
+        Args:
+            self: The instance of the class.
+        """
+        # Method implementation...
 
     def switch_thread(self, thread_id):
         """
         Switch the active thread to a specified thread ID.
 
         Args:
+            self: The instance of the class.
             thread_id (str): The ID of the thread to switch to.
         """
-        if thread_id in self.threads:
-            self.active_thread = thread_id
-            self.load_conversation(thread_id)
-        else:
-            print(f"Thread {thread_id} does not exist.")
+        # Method implementation...
 
     def load_threads(self):
         """
         Load the list of threads from a file.
-        """
-        threads_directory = 'threads'
-        threads_file = os.path.join(threads_directory, 'threads.json')
 
-        try:
-            with open(threads_file, 'r', encoding='utf-8') as file:
-                self.threads = json.load(file)
-        except FileNotFoundError:
-            self.threads = {}
-        except Exception as e:
-            print(f"Error loading threads from file: {e}")
+        Args:
+            self: The instance of the class.
+        """
+        # Method implementation...
 
     def run(self):
         """
         Run the chatbot CLI.
-        """
-        print("Welcome to the Chatbot! Type 'quit' to exit.")
-        self.create_thread()
 
-        while True:
-            user_input = input("You: ")
-            if user_input.lower() == 'q':
-                break
-            elif user_input.lower() == 'new thread':
-                thread_id = self.create_thread()
-                print(f"Created new thread with ID: {thread_id}")
-            elif user_input.lower().startswith('switch thread'):
-                thread_id = user_input.split()[-1]
-                self.switch_thread(thread_id)
-            else:
-                conversation_history = self.threads[self.active_thread]
-                conversation_history.append(user_input)
-                self.save_conversation(self.active_thread)
-                response = Chatbot.chat_with_gpt(conversation_history)
-                conversation_history.append(response)
+        Args:
+            self: The instance of the class.
+        """
+        # Method implementation...
 
 
 if __name__ == "__main__":
