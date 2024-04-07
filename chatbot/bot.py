@@ -101,7 +101,8 @@ class Chatbot:
             directory = os.path.dirname(filename)
             if not os.path.exists(directory):
                 os.makedirs(directory)
-            open(filename, 'w', encoding='utf-8').close()  # Create an empty file if it doesn't exist
+            with open(filename, 'w', encoding='utf-8') as file:
+                pass  # Create an empty file if it doesn't exist
             return []
 
         try:
