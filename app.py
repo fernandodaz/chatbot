@@ -1,7 +1,11 @@
+"""
+This module defines the Flask application for the chatbot.
+"""
+
+import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
 from chatbot.bot import Chatbot
-from dotenv import load_dotenv
-import os
 
 # Load environment variables from .env file
 load_dotenv()

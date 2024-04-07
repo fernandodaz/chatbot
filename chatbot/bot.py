@@ -1,3 +1,7 @@
+"""
+This module defines the Chatbot class for managing chatbot interactions.
+"""
+
 import json
 import os
 from dotenv import load_dotenv
@@ -106,6 +110,9 @@ class Chatbot:
                 if not content:
                     return []
                 return [line.strip() for line in content.splitlines()]
+        except FileNotFoundError:
+            print(f"File {filename} not found.")
+            return []
         except Exception as e:
             print(f"Error loading conversation from file: {e}")
             return []
